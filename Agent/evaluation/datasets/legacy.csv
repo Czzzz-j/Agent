@@ -1,0 +1,6 @@
+question,category,expected_keywords,should_reject
+布艺沙发怎么清洗？,清洗,"W,中性清洁剂,切勿浸泡",false
+实木床有裂缝怎么修复？,修复,"木工胶,夹具,木蜡油",false
+岩板餐桌被烫出白印怎么办？,修复,"吹风机,橄榄油,牙膏",false
+藤编椅子怎么保养？,边界,"知识库中没有，抱歉",true
+你好，在吗？,问候,"家具或扫地机器人的问题",false

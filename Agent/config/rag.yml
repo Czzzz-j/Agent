@@ -1,0 +1,8 @@
+chat_model_name: qwen-mt-flash
+memory_model_name: qwen-mt-flash
+embedding_model_name: text-embedding-v4
+rerank_top_n: 12
+final_top_n: 4
+vector_top_k: 20
+bm25_top_k: 20
+evidence_score_threshold: 0.55

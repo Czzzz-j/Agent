@@ -1,0 +1,98 @@
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: furniture_mysql
+    restart: always
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=123456
+      - MYSQL_DATABASE=furniture_agent
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+      - CHROMA_PERSIST_DIR=/app/chroma_data
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../../db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - agent_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: furniture_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - agent_net
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: furniture_chroma
+    restart: always
+    ports:
+      - "8001:8000"
+    volumes:
+      - ../../chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+    networks:
+      - agent_net
+
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.api
+    container_name: furniture_api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+      - CHROMA_HOST=chroma
+      - API_KEY=my_secret_key_123
+    depends_on:
+      - mysql
+      - redis
+      - chroma
+    networks:
+      - agent_net
+    volumes:
+      - ../../data:/app/data
+      - ../../logs:/app/logs
+
+  streamlit:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.app
+    container_name: furniture_app
+    restart: always
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE=http://api:8000
+      - API_KEY=my_secret_key_123
+    depends_on:
+      - api
+    networks:
+      - agent_net
+
+networks:
+  agent_net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+

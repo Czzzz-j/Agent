@@ -1,0 +1,22 @@
+# Workspace-only files
+.claude/
+.agents/
+tmp/
+tools/
+*.exe
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Local secrets
+.env
+**/.env

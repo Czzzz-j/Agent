@@ -1,0 +1,35 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# 更换 apt 源为国内源（可选，加速安装 gcc）
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# 第一步：安装除 sentence-transformers 外的所有依赖（避免 torch 下载提前失败）
+RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ \
+    fastapi \
+    uvicorn[standard] \
+    langchain \
+    langchain-community \
+    langchain-core \
+    chromadb \
+    pymysql \
+    mysql-connector-python \
+    redis \
+    dashscope \
+    PyPDF2 \
+    python-multipart \
+    pyyaml
+
+# 第二步：单独安装 sentence-transformers（它会拉取 torch，使用较长超时）
+RUN pip install --no-cache-dir --timeout 600 -i https://mirrors.aliyun.com/pypi/simple/ \
+    sentence-transformers
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
